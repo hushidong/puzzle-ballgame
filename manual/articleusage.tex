@@ -1,0 +1,174 @@
+\section{使用说明}
+
+\subsection{期刊信息输入}
+利用如下命令输入期刊信息:
+\begin{texlist}
+\qikanming{期刊名}     %期刊名,journal name
+\nianfen{2016}         %年份,year
+\juanshu{25}           %卷数,volume
+\qishu{4}              %期数,number
+\zongqishu{99}         %总期数,
+
+\wenzhangdoi{10.11729/syltlx} %doi号
+%文章编号
+\wenzhangbianhao{1672-9897（2014）01-0000-00}
+\zhongtu{（V211.751）} %中图分类号
+\wenxianbiaozhi{A}     %文献标志码
+\end{texlist}
+
+
+\subsection{文章信息输入}
+利用如下命令输入文章信息，副标题没有可以留空:
+\begin{texlist}
+\biaoti{关于期刊论文的模板}%标题,title
+\fubiaoti{副标题}          %副标题,subtitle
+
+\authorinput{张某某; 李~~四; 赵~~五} %作者间用英文分号隔开
+\schoolinput{中国洛阳电子装备试验中心~~河南洛阳~~471000;中国电子装备研究中心~~北京~~471000}              %单位间用英文分号隔开
+\includinput{1,2; 1; 1}    %各作者所属单位用英文分号隔开，
+                           %一位作者的多个所属单位用英文逗号隔开
+%摘要,abstract
+\zhaiyao{基于latex语言,利用texlive2015套件,建立了期刊的论文模板,使用该模板,在输入论文的信息和内容后,可以编译生成固定格式的单篇论文的pdf文件,也可以生成整本期刊的pdf文件。并且在模板中介绍了图,表,公式,参考文献的插入和应用。}
+%关键词,keywords，多个关键词用\kongge隔开
+\guanjianci{latex语言 \kongge texlive2015套件 \kongge 论文模板}
+%use \kongge as separation
+%收稿等时间,第一/通信作者简介,
+\diyizuozhe{收稿日期:2015-01-09；修回时间:2015-03-02 \\ 第一作者简介：}
+%introduction of corresponding author
+\zuozhejianjie{张某某（1984-），男，博士，工程师，主要研究方向为通信与通信对抗，Email: zhmail@163.com。}
+\end{texlist}
+
+\subsection{正文,图,表,公式}
+正文内容按照正常Latex文档输入，注意论文格式最高一层标题是section，通常最多采用三级标题。
+
+图的插入方法,使用环境insertfigure,第一个参数为图的标题,第二个参数为图的引用标签。图的引用使用命令\textbackslash ref\{标签名\},比如: 这里引用图
+\ref{fig:testa}。
+
+\begin{insertfigure}{示意图}{fig:testa}{sketch figure}
+  %\includegraphics[width=\linewidth]{recievedpower.pdf}
+  \centering
+  \begin{tikzpicture}
+  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+  \fill[red] (45:5mm) circle (1mm);
+  \fill[red] (135:5mm) circle (1mm);
+  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+  \end{tikzpicture}
+\end{insertfigure}
+
+表的插入方法,使用环境inserttable,第一个参数为表的标题,第二个参数为表的引用标签。表的引用使用命令\textbackslash ref\{标签名\},比如: 这里引用表
+\ref{tab:testa}。
+
+注意短的非跨页表格生成环境使用tabular，而长的跨页表格生成环境使用supertabular，但还不成熟需要再看看，它不能在第二栏中进行分栏。
+
+\begin{inserttable}{示意表一}{tab:testa}{sketch table}%第三个参数为空则是单语言标题
+\zihao{-5}
+  \begin{tabular}{p{0.4\columnwidth}p{0.45\columnwidth}}
+    \toprule
+    % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+    文档结构 & 使用的环境 \\ \midrule
+    图 & insertfigure \\
+    表 & inserttable \\
+    公式 & equation \\
+    \bottomrule
+  \end{tabular}
+\end{inserttable}
+
+公式的插入用环境equation,式中参数的说明用下面的格式。公式的引用也用命令\textbackslash ref\{标签名\}。比如: 这里引用公式(\ref{eq:testa})。
+\begin{equation}\label{eq:testa}
+f(s)=\frac{1}{s\sigma\sqrt{2\pi}}\exp\left(-\ln^2\left(\frac{s}{\mu}\right)\right), s \geq 0
+\end{equation}
+式中$\mu$——$S$的中值
+
+$~\sigma$——遮蔽衰弱强度
+
+\subsection{插入代码/文件网址超链接}
+
+插入代码基本格式如下:
+\begin{codetex}{参考文献信息基本格式即bibtex格式}{fmt:bibtex}
+@ARTICLE{entrykey,
+  author =       {},
+  title =        {},
+  journal =      {},
+  year =         {},
+  volume =       {},
+  number =       {},
+  pages =        {},
+  month =        {},
+}
+\end{codetex}
+
+使用mathematica计算如下:
+\codefilemath{雷达方程关于检测距离，SNR，脉冲宽度的计算}{radar:eq:math}{code-radar-equation.tex}
+
+使用文献助手工具，地址:\url{http://cite.latexstudio.net}
+
+详细的内容可以参考:\href{run:./code-radar-equation.tex}{tex源文件}
+
+\subsection{项目编号}
+
+\begin{enumerate}
+  \item Google 学术
+  \item CNKI
+  \item 文献助手
+\end{enumerate}
+
+
+\subsection{参考文献}
+
+参考文献的引用采用\textbackslash cite命令,比如:这里引用文献\cite{詹广平2013-8-10}。用的命令是\verb|\cite{詹广平2013-8-10}|
+
+参考文献样式需要参考文献数据库文件即bib文件，该文件可以通过Jabref等软件生成，或者直接根据bib文件格式写出。
+
+参考文献的bib文件内容举例如下:
+\begin{texlist}
+% This file was created with JabRef 2.11.
+% Encoding: UTF8
+@Article{詹广平2013-8-10,
+  Title                    = {美海军宙斯盾系统开放式体系结构研究},
+  Author                   = {詹广平},
+  Journal                  = {舰船电子工程},
+  Year                     = {2013},
+  Number                   = {11},
+  Pages                    = {8-10},
+  Volume                   = {33}
+}
+\end{texlist}
+
+\subsection{文档编译}
+
+文档的编译,通常需要两遍,第一遍生成图,表,公式,参考文献等的引用信息,第二遍将这些信息插入到需要的地方。其中在两遍之间需要对参考文献信息进行处理利用biber soucefilename.tex命令即可。
+
+\subsection{格式说明}
+\begin{description}
+  \item[论文名称] 小2号黑体
+  \item[作者姓名] 4号楷体
+  \item[单位名称/地址/邮编] 5号楷体
+  \item[摘要] 5号黑体
+  \item[摘要内容] 5号仿宋体
+  \item[标题1] 4号黑体
+  \item[标题1.1] 5号黑体
+  \item[标题1.1.1] 5号宋体
+  \item[正文] 5号宋体
+  \item[参考文献标题] 5号黑体
+  \item[参考文献内容] 小5号宋体
+  \item[图表公式] 按顺序连续编号（如图1，图2，…；表1，表2，…；式（1），式（2），…），
+图表均要标注相应题名，采用小5号黑体，图表中文字与数据采用小5号宋体。
+  \item[公式] 字体为斜体，单位符号为正体
+  \item[正文排版] 采用双栏排版，每页2×20字×40行
+  \item[首页脚注] 注明第一作者简介（姓名、出生年、性别、学位、职称、现主要研究方向）
+  \item[页边距] 上3cm，其它均为2.5cm
+  \item[页眉页脚] 首页，奇数页:左期刊名，中无，右年份卷数期数（总期数）页码；偶数页:左页码，期刊名，中无，右，年份卷数期数（总期数）。非首页，奇数页:左期数，中作者和标题，右页码；偶数页:左页码，中期刊名，右年份和卷数。
+\end{description}
+
+\subsection{测试行数和字数}
+
+ \newcounter{linestoprint}
+  \setcounter{linestoprint}{0}
+\whileboolexpr{test {\ifnumcomp{\value{linestoprint}}{<}{40}} }
+{\addtocounter{linestoprint}{1}\noindent 字数为四字数为八字数为十三\hfill 字数为一十九\thelinestoprint\par}
+\lipsum[1-4]
+
+%样式说明及其实现--放到articleimplement.tex文件中，通常不包含进来。
+%\input{articleimplement.tex}
+
+

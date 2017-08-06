@@ -1,0 +1,760 @@
+\documentclass[11pt,twoside]{article} %用draft选项找到badbox的位置
+\input{./manual/articlemodelparta.tex}
+%%----------------------------------------------------------------------
+%%                  参考文献库添加
+%%----------------------------------------------------------------------
+\addbibresource[location=local]{d:/zlatex/zlatexreference/paperone.bib}
+%论文1的参考文献的bib文件
+%\addbibresource[location=local]{../zlatexreference/papertwo.bib}
+%论文2的参考文献的bib文件
+
+
+%%----------------------------------------------------------------------
+%%                  正文
+\begin{document}
+%%----------------------------------------------------------------------
+
+%----------------------------------------------------------------------
+%                  第一篇论文-填写基本信息
+%----------------------------------------------------------------------
+\qikanming{\LaTeX 爱好者}                              %期刊名,journal name
+\nianfen{2017}                                  %年份,year
+\juanshu{1}                                    %卷数,volume
+\qishu{1}                                       %期数,number
+\zongqishu{99}                                  %总期数,
+
+\wenzhangdoi{10.11729/syltlx}                   %doi号
+\wenzhangbianhao{1672-9897（2014）01-0000-00}   %文章编号
+\zhongtu{（V211.751;TP391.9）}                  %中图分类号
+\wenxianbiaozhi{A}                              %文献标志码
+
+\biaoti{一个拼图游戏QT开发说明}                     %标题,title
+\entitle{ON THE MODEL OF ARTICLE}%%english title
+\fubiaoti{}                               %副标题,subtitle
+
+\authorinput{胡振震} %作者间用英文分号隔开
+\enauthor{ZHANG MOU~~ LI SI~~ ZHAO WU}
+\schoolinput{~LEETC~~CHINA~~100000~}                        %单位间用英文分号隔开
+\enunit{China Research Center, 100010, China}%LEETC
+\includinput{1}              %各作者所属单位用英文分号隔开，
+                                     % 一位作者的多个所属单位用英文逗号隔开
+
+                                                % 摘要,abstract
+\zhaiyao{设计了一个拼图游戏，拼图形状由相同或不同数量的球连接而成，各连接球形状通过拼图最终可以拼成一个三角矩阵(各形状中的球构成的三角网格)。游戏代码采用QT实现，主要利用QGraphicsView实现交互界面与行为逻辑，利用C++类完成形状划分/形状唯一性/形状落位判断等核心算法。游戏操作最主要的操作是点击(鼠标左键)，用于选择形状和空位以完成形状控制，其它控制可以由按钮或鼠标加键盘实现。}
+\enabstract{A periodical paper model is constructed with latex language using texlive。This model filled with necessary information can be compiled into single paper or multiple papers pdf file which has the fixed format。Insertion and application of Figure, table, equation, bibliography elements are instructed as well.}
+
+                                                % 关键词,keywords
+                                                % 多个关键词用\kongge 隔开
+\guanjianci{拼图游戏 \kongge QT \kongge C++ \kongge 连接球形状}
+\enkeywords{latex language~~ texlive2015~~ paper model}
+                                                %use \kongge as separation
+
+                                          % 收稿等时间,第一/通信作者简介,
+%% history:
+%% 2017-08-01 v1.0  完成基本内容
+\def\versionnumber{v1.0}    %版本和修改时间信息
+\def\versiondate{2017-08-01}
+\diyizuozhe{The files have version number \versionnumber, last revised \versiondate.\\ 第一作者简介：}
+                                          %introduction of corresponding author
+\zuozhejianjie{HU ZHENZHEN，A \LaTeX ~LOVER，Email: hzzmail@163.com。}
+
+
+%----------------------------------------------------------------------
+%                  第一篇论文-正文内容
+\input{./manual/articlemodelpartb.tex}
+%----------------------------------------------------------------------
+\section{引言}
+
+最初想开发一个拼图游戏是因为朋友送了一套实体的拼图游戏玩具，给孩子玩玩有益智力发展。当时就涌起一个想法是不是可以做一个类似的小游戏，可以跨平台使用，比如在电脑，在手机上使用，这样随时随地都可以玩，也可以用APP的方式还给朋友的孩子，毕竟这套玩具本来属于朋友的孩子，她送出去一条实体玩具，又得到一个游戏应用，多少有些安慰。加之正好想借游戏开发这个事熟悉C++和QT，笔者在写代码这块以前主要是使用Fortran用于科学数值计算，最多用用VB做个简单界面封装一下程序，因为工作变动需要使用C++，尽管这在大学是学过的，但久不用多少忘了，这样因为切合需求所以很快就付诸实践。
+
+这是一个简单的拼图游戏，存在由空位构成上(下)三角矩阵，每个空位上可以放置一个球，而这些球以某种链接形式的形状方式存在，这些形状都是不同的，在游戏时将这些形状放入空位，当把所有形状放入填完所有空位则游戏完成。游戏完成的基本形式应如图\ref{fig:game:idea}所示。
+
+\begin{insertfigure}{游戏基本构想}{fig:game:idea}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.4\linewidth]{fig-idea.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-beam-loss.tex}
+\end{insertfigure}
+
+这样一个游戏，本质是一个交互的界面，游戏者可以操作由球构成的不同形状填入空位中，直至完成全部填空。考虑用QT开发这个游戏，思路主要是利用qt的QGraphicsView框架来构造图形界面，操作动作的影响利用qt的信号槽机制实现，而底层的逻辑算法以C++类及其方法来实现。总的来说是将其分为两层，qt的图形和事件传递负责用户界面构造，而核心的算法则主要是设计C++类。
+
+因此做的第一步，其实主要是核心算法的设计，主要有:球连接起来构成的形状的描述(数据结构，唯一性)，形状的变换(旋转，翻转)，形状的生成(空位三角矩阵的随机划分)，形状放入空位时的判断，以及构成形状的球的描述等。大体上可以分为三个类，一个是球(balltopo)，一个是球构成形状(linkshape)，最后一个是球构成的网格(grid，也就是下三角矩阵)。在构建界面之前，主要是初步设计和实现这三个类，并进行测试，主要包括:网格构建与显示，形状的描述与显示，球的描述(自身以及邻居)，球在网格中行列号与球序号的关系，形状变换和唯一性判断算法，形状放入网格时(即落位)的判断算法，从网格中生成形状的算法等，这可以利用纯c++代码实现并进行编译测试。
+
+之后则利用qt构建图形界面，需要构建一个网格类ballgrid继承自grid用于总体的控制和实现，构建一个形状类ballshape用于形状的绘制和信号传递，还有构成形状的ballitem球类用于球的绘制以及信号的传递，以及构成网格的框类boxitem用于网格空位的绘制以及信号的传递。其中ballitem类与balltopo类没有直接关系，只是ballgrid利用其具有的balltopo类的信息，利用ballitem类对象进行绘制。boxitem类的情况相同。ballshape类的情况大体也差不多，与linkshape类没有直接关系，主要是根据ballgrid类中的linkshape信息进行绘制以及作为ballitem对象和ballgrid对象传递信息的中介。在qt的QGraphicsView框架中，除了QGraphicsItem外，还有QGraphicsItemGroup用于QGraphicsItem的编组，理论上使用编组是描述ballshape的不错选择，但因为构成QGraphicsItemGroup时，qt总是将QGraphicsItemGroup的中心设置为场景(scene)的中心，并不是构成group的所有item的中心，这样对于形状旋转后的位置操作带来一定的困难，所以在实际中没有采用QGraphicsItemGroup，而完全是由QGraphicsItem进行操作，而利用ballshape类对象对所属的QGraphicsItem进行管理。
+
+上述的总体思路其实不是在写代码之前的预先构思，而是在初步构思的基础上在写代码过程中不断完善的，因为最开始总会有一些问题没有预想到，也总有一些算法并不完善，比如形状划分算法和形状唯一性判断算法，划分算法目前没有采用特殊的搜索方法，而仅仅是采用随机走位方法，靠的是像蒙特卡洛的大量计算，而形状唯一性判断最初利用邻接矩阵特征值的唯一性描述，但后来发现这些特征值只能用于球的连接关系是否相同的判断，而它不等于形状的唯一性，后来增加了位置矩阵的判断，并考虑多种旋转和翻转变换综合考虑形状的唯一性。而关于C++和qt语言的问题则是在初步了解语言特性基础上，直接就进行实践了，遇到问题查书籍查帮助，主要解决了一些问题包括:数组作为参数的函数传递，动态数组vector/qt中Qlist使用/qt中Qstring的使用，指针及其在参数传递信号槽链接中用法，类的构造/构造函数重载/用方法组成构造函数，信号和槽的构造和连接，qt部件使用，qt布局使用，qDebug和qmessagebox的使用，类的不同继承(没有用到多态)，结构体/typedef使用，基本流程控制(if，switch，for，while，do while)，qt对象的鼠标和键盘事件(键盘事件需要焦点)，qt中视图场景图元的坐标以及QPointF和QlineF等使用，qt和c++中的随机数，qt中的颜色，qt中部件和图元的绘图机制，等等。所有的这些都在实践中摸索其使用方法，最终完成整个程序。当然还有更多的机制可以使用但目前没有去使用，毕竟这是一个游戏不能花过多的时间进去，以后只能在业余时间完善了。可以进一步完善的或使用的机制包括:
+\begin{enumerate}
+  \item 图元碰撞检测机制(目前没有考虑这个，落位的判断完全由位置进行判断)
+  \item 拖放机制(目前没有采用这个，而直接用点击选择的方式实现)
+  \item 多媒体/动画(游戏的操作可以配上声音，游戏的提示可以使用动画特别是完成后的奖励(比如根据时间和难度进行计分)，球和框以及界面的配色美化3d效果等)
+  \item 状态机(目前没有考虑状态机，而完全由标志变量处理)
+  \item xml机制(配置文件可以用xml写，比如默认划分方案等，基本方案是网格大小6/7，形状大小4;网格大小8-12，形状大小是5)
+  \item 自动落位算法没有实现
+  \item 划分算法还需要进一步改进(目前采用的方法耗时较长)
+  \item 唯一性算法还需要证明(目前看起来是可以了，但也许有更好的方法，而且目前的方法没有完成数学证明)
+  \item 代码需要进一步完善(动态数组代替数组，引用传递代替传值，优化减小计算量等)
+\end{enumerate}
+
+\section{开发环境准备}
+
+\subsection{C++环境}
+
+C++环境直接使用GNU的编译器即下载gcc套装。因为在windows下做，所以下载安装mingw，或者直接使用以前的安装，而新的gcc编译套装安装则下载一套覆盖mingw中的gcc即可，下载文件比如:
+%\lstinline!i686-6.3.0-release-win32-dwarf-rt_v5-rev1.7z!
+i686-6.3.0-release-win32-dwarf-rt\_v5-rev1.7z。安装完成后，可以使用它来进行c++程序编译。
+编译可以写一个最简单的编译脚本，这样就不用每次都去输命令，运行一下编译的bat文件即可，比如:
+\begin{codebasic}{简单编译脚本}{code:compile:bat}
+cls
+
+del /q a.exe
+
+gcp a.cpp 1
+
+pause
+\end{codebasic}
+
+这是用来编译测试核心算法的c++程序的，其中gcp也是一个bat文件如下:
+\begin{codebasic}{gcp编译脚本}{code:compile:gcp}
+cls
+@echo off
+title Gcc::g++ WD:%cd% %date% %time%
+
+rem :如果没有输入则提示错误
+   SET srcfile=%1
+   SET laststr=%2
+   if "%laststr%" =="" (
+      echo 错误:没有输入参数，请重新输入!!!
+      goto endcmd
+   ) else (
+      goto dealfile
+   )
+
+rem :处理输入参数
+:dealfile
+   rem :当源文件为cpp结尾时直接去1~倒数第4个字符即去掉.cpp
+   set exefile=%srcfile:~0,-4%.exe
+
+   rem :多文件输入情况处理
+   rem :多文件输入时cpp编译出来的exe以第一个文件的文件名为exe文件名
+   rem :因此exe文件名无需继续处理只要处理源文件和进程数就足够
+   :loopread
+      shift
+      set judge=%2
+      if "%judge%" =="" (
+         goto compile
+      ) else (
+         set srcfile=%srcfile% %1
+         SET laststr=%2
+         goto loopread
+      )
+
+rem :对源文件进行编译
+:compile
+   echo ===========================================================
+   echo compile the cpp file with g++
+   echo ===========================================================
+   echo g++ -o %exefile% %srcfile%
+   g++ -o %exefile% %srcfile% -std=gnu++11
+
+
+::-Ofast
+rem :删除编译过程文件
+   if exist *.mod del *.mod /Q
+   if exist *.obj del *.obj /Q
+   if exist *.o del *.o /Q
+
+rem :执行exe文件
+   echo.
+   echo ==========================================================
+   echo Run the executable file
+   echo ==========================================================
+   echo %exefile% %laststr%
+   echo.
+   %exefile% %laststr%
+
+rem :暂停敲任意键结束
+:endcmd
+   pause
+\end{codebasic}
+这个脚本原先是用来编译fortran程序的，对于c++程序原理是一样的，只是把编译命令gfortran换成了g++，其中看到删除的.mod，.obj文件其实是fortran程序编译的过程文件。c++的过程文件是.o文件。其中输入的最后一个参数本来是用来输入fortran程序并行计算时的进程数的，对于c++程序来说，则变成为了main程序中argc[]参数输入。
+
+\subsection{qt环境}
+qt的安装使用也非常简单，用的是qt5，下载的版本5.51(qt-opensource-windows-x86-mingw492-5.5.1.exe),5.80(qt-opensource-windows-x86-mingw530-5.8.0.exe)。 实际装的是5.51的，用5.80也是一样的。使用的mingw版，利用的是gnu的c++编译器，而不是微软的visual studio编译器，这样可以少装点软件。
+
+顺便说一点的是，因为qt的跨平台特性，所以在不同的平台环境下测试了不少qt安装，实际使用中有几点需要注意:
+\begin{enumerate}
+  \item Windows 7 64/32 位下安装，使用正常。
+  \item Windows 7下的虚拟机中的xp中安装正常，但是使用存在问题，一是pixmap失效(这是在某个xp虚拟机中creator没有问题的情况下)，二是creator失效，无论是安装vcredist，还是.netframework都无法使其正常。
+  \item Windows 7下的虚拟机中的win7中安装正常，使用也基本正常，但pixmap失效，在虚拟机win7中即便是加上绝对路径也无效。
+  \item Linux (银河麒麟社区16版)，qt安装正常，使用也正常，但是要注意pixmap中的路径需要有点，比如”./a.png”，而不是”a.png”。注意linux安装的版本是不同的:qt-opensource-linux-x64-5.8.0.run。
+\end{enumerate}
+
+qt的开发方法分命令行方法和集成环境(IDE)方法。命令行方法就是利用文本编辑器写代码，用命令行命令编译。而集成环境方法就是利用qt提供的creator进行代码开发，界面设计，编译运行。qt提供了三个主要工具是creator，designer，assistant，分别是集成开发环境，界面设计师和帮助。creator中也可以调用帮助，但因为帮助的使用频率很高，可以单独打开便于查找。
+
+\subsubsection{命令行方法}
+命令行方法步骤如下:
+\begin{enumerate}
+  \item 安装qt-mingw，比如:
+
+qt-opensource-windows-x86-mingw492-5.5.1.exe
+
+配置环境:
+
+\lstinline[language=bash,breaklines=true,keywordstyle=\color{blue}\bfseries]!set PATH=C:\Qt\Qt5.5.1\5.5\mingw492_32\bin;C:\Qt\Qt5.5.1\Tools\mingw492_32\bin;%PATH%!
+
+
+  \item 建目录并进入:
+
+\lstinline[language=bash,keywordstyle=\color{blue}\bfseries]!mkdir helloqt!
+
+\lstinline[language=bash,keywordstyle=\color{blue}\bfseries]!cd helloqt!
+
+在目录下构建一个与目录同名的主cpp文件:
+
+\lstinline[language=bash,keywordstyle=\color{blue}\bfseries]!echo>helloqt.cpp!
+
+利用文本编辑helloqt.cpp，构建基本qt程序。比如:
+
+\begin{codecpp}{简单qt程序}{code:qt:eg}
+#include <QApplication>
+#include <QPushButton>
+
+int main(int argc, char *argv[])
+{
+	QApplication app(argc,argv);
+	QPushButton pushButton(QObject::tr("hello qt !"));
+	pushButton.show();
+	//QObject::connect(&pushButton,SIGNAL(clicked()),&app,SLOT(quit()));
+	QObject::connect(&pushButton,QPushButton::clicked,&app,QApplication::quit);
+	return app.exec();
+}
+\end{codecpp}
+
+其中信号槽链接给出了两种语法都是可以用的，注释掉的是qt4中的语法，下面一条则是qt5的语法。
+
+  \item 建立起工程，在该目录下的命令行运行:
+
+\lstinline[language=bash]!qmake -project!
+
+编辑工程(因为qt5与qt4的模块分类不同)所以加入下面语句确保运行正确:
+
+\lstinline[language=bash]!greaterThan(QT_MAJOR_VERSION,4):QT += widgets #trans from qt4 to qt5!
+
+如果要给程序加一个图标，则在工程文件中加入如下语句:
+
+\lstinline[language=bash]!RC_ICONS= ele.ICO  #add icon!
+
+
+  \item 编译构建:
+
+\lstinline[language=bash]!qmake helloqt.pro!
+
+\lstinline[language=bash]!mingw32-make.exe!
+
+
+  \item 运行
+
+\lstinline[language=bash]!release\helloqt!
+\end{enumerate}
+
+\subsubsection{集成开发方法}
+利用creator集成开发环境的步骤如下:
+
+\begin{enumerate}
+\item 安装qt-mingw，比如
+
+qt-opensource-windows-x86-mingw492-5.5.1.exe
+
+\item 直接打开qt creator
+
+新建工程，选择qt widget application，命名工程，选择主界面基类，勾选(或不勾选)ui，勾选表示利用designer构建一个ui界面，如图\ref{fig:new:pro}，\ref{fig:pro:name}，
+\ref{fig:pro:kit}，\ref{fig:pro:class}所示:
+
+\begin{insertfigure}{选择qt widget application}{fig:new:pro}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-newpro.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+\begin{insertfigure}{命名工程选择位置}{fig:pro:name}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-propos.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+\begin{insertfigure}{选择编译工具}{fig:pro:kit}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-prokit.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+\begin{insertfigure}{选择主界面基类}{fig:pro:class}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-mainclass-ui.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+双击界面文件mainwindow.ui，用designer编辑工程中的ui，其中添加一个pushbutton，修改其文本为hello!，
+添一个加designer中自带的信号和槽，pushbutton的clicked，到 mainwindows的close()，完成如图\ref{fig:pro:ui}所示。
+
+\begin{insertfigure}{编辑ui界面添加信号槽}{fig:pro:ui}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-uidesign-signal-slot.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+\item 菜单:保存工程，快捷键:
+
+\lstinline!ctrl + S!
+
+\item 菜单:编译构建工程，如图\ref{fig:pro:build}所示，快捷键:
+
+\lstinline!ctrl + B!
+
+\begin{insertfigure}{编译构建}{fig:pro:build}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-build.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+\item 菜单:运行，结果如图\ref{fig:pro:run} 所示，当点击其中的按钮则界面窗口关闭，快捷键:
+
+\lstinline!ctrl + R!
+
+\begin{insertfigure}{运行结果}{fig:pro:run}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.6\linewidth]{fig-run.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+\end{enumerate}
+
+\subsection{qt/c++程序开发的理解要点}
+
+面向对象编程(不仅仅是qt/c++程序开发)的一个关键问题是要理解记住: 任何事物都表示成一个对象，无论这个对象是实际事物，还是想象中。在编程过程中实际上是对这样的一个个对象在进行操作。面向对象编程技术和传统结构化编程的主要差别就是面向对象过程中对象的使用贯穿始终。一个对象用类描述，因此一种对象就需要设计一种类，在编程过程中各种对象就是要设计各种类，有的基础类qt已经提供了，但不能完全满足需求，因此还需要在其基础上设计新的类，要大胆的继承，利用现有类的功能，然后增加需要的属性和方法来满足最后的需求。
+
+界面的窗体和部件(常见如按钮，编辑框，列表框等)是对象，只是它们具有图形化表示。前面说的ball，shape，grid类创建的也是对象，只是没有图形化表示，需要用ballgrid，ballitem等类的对象来进行对应的图形显示。对象的调用有三种方式: 对象本身，对象指针，对象引用，在使用过程中要注意使用的场合。
+
+qt中使用集成开发环境的话，使用的信号槽，如果是默认的信号和槽，那么通常只需要定义转到的槽的函数即可。如果需要自定义槽，则需要在类的头文件和源文件中声明和实现。
+
+qt界面对象具有指针ui，界面上的对象用ui->对象名即可调用。c++生成对象具有指针this，可以用这个指针做很指代对象自身，这在信号槽链接时很有用。
+
+qt中简单的调试可以用qDebug进行输出，当存在莫名其妙的程序错误时，将编译文件夹删除，重新构建，特别是在类原先不继承QObject但修改继承QObject后往往会出现错误。命令行下，可以将除工程和源代码外的文件删除，重新qmake *.PRO，然后mingw32-make.exe，一般能解决问题。
+
+
+\section{程序设计}
+
+下面按类来说明程序的实现，主要从类的使用功能需求以及满足需求的实现两个方面来进行说明，同时夹杂相关的qt和c++语言说明。
+
+\subsection{boxitem类}
+\subsubsection{功能分析}
+boxitem类主要用途包括:
+\begin{itemize}
+  \item 绘制网格的空位，空位用方框表示，用于放置各形状中球
+  \item 可以被选中并发送信号，用于放置球过程中的判断和操作
+\end{itemize}
+
+为了可以绘制方框，并且可以被选中，考虑继承QGraphicsRectItem。
+为了可以向其它对象发送信号，考虑继承QObject。
+
+因此类的声明为:
+\codefilecpp{boxitem类声明}{code:boxitem:declaration}{./ballitem/boxitem.h}
+
+
+\subsubsection{代码实现}
+boxitem类的实现也比较简单，如例\ref{code:boxitem:definition}所示:
+\codefilecpp{boxitem类定义}{code:boxitem:definition}{./ballitem/boxitem.cpp}
+其中，最重要的是在构造函数中设置可以被选中可以作为焦点，第二是被鼠标点击时发送被点击需要判断形状落位的信号。
+
+
+\subsection{ballitem类}
+\subsubsection{功能分析}
+ballitem类主要用途包括:
+\begin{itemize}
+  \item 绘制形状中的球，用圆形表示
+  \item 可以用鼠标左键点击，表示选中当前形状，用于后面的形状落位判断，因此需要发送鼠标左键被点击信号
+  \item 可以用鼠标右键点击，表示选中当前形状，用于从落位状态回到非落位状态，因此需要发送鼠标右键被点击信号
+  \item 可以用键盘操作，用于形状的控制，比如旋转和翻转，因此需要发送鼠标右键被点击信号
+\end{itemize}
+
+为了可以绘制圆形，并且可以被选中，考虑继承QGraphicsEllipseItem。
+为了可以向其它对象发送信号，考虑继承QObject。
+
+因此类的声明为:
+\codefilecpp{ballitem类声明}{code:ballitem:declaration}{./ballitem/ballitem.h}
+
+其中因为直接利用QGraphicsEllipseItem画圆，而不用重新画，因此不重新实现paint函数，直接使用QGraphicsEllipseItem的一些方法。
+
+
+\subsubsection{代码实现}
+ballitem类的实现，如例\ref{code:ballitem:definition}所示:
+\codefilecpp{ballitem类定义}{code:ballitem:definition}{./ballitem/ballitem.cpp}
+
+在构造函数中，利用setflag，设置ballitem可以被选中，可以设置焦点，使用Q\_UNUSED函数取消因为未使用parent带来的警告。
+
+setshapeid，setballid两个函数用于设置当前ballitem所属形状的序号，及其在当前形状中球的排列序号(即形状中的第几个球)。
+
+鼠标点击事件处理函数中，根据点击的左键和右键分别发送不同的信号。
+
+键盘敲击事件处理函数中，根据键入的键是上下左右箭头键，发送信号表示对当前球所在的形状做不同的旋转和翻转方式。
+
+
+
+\subsection{ballshape类}
+\subsubsection{功能分析}
+ballshape类主要功能是管理本形状内部的球(ballitem)。
+主要用途包括:
+\begin{itemize}
+  \item 生成当前形状图形和管理其中的球(数量，图形位置大小颜色)
+  \item 将形状中的球加入或移出场景
+  \item 设置当前形状内球的位置，记录在网格外的位置，重设该位置
+  \item 获取当前形状内选择的球的位置，用于是否在网格内，以及所在网格的空位序号判断
+  \item 需要传递当前形状被选中的信号，用于落位判断，旋转等操作
+\end{itemize}
+
+为了可以向其它对象发送信号，考虑继承QObject。为了绘制形状，ballshape属性中包含ballitem类对象用于表示形状内的球。为便于管理还包含球的大小属性，球在网格外的位置信息，当前形状序号，当前选择的球的序号。
+
+因为ballshape的属性中ballitem类对象，因此ballitem类传递出的信号，最方便的是与ballshape中的槽进行连接，然后由此中转到其它对象比如ballgrid中。因此需要接受来自ballitem的三个信号，左键点击，右键点击，键盘键入三个事件发出的信号。同时需要将这三个信号中转到ballgrid中，因此也设置并发送三个信号。
+
+因此类的声明为:
+\codefilecpp{ballshape类声明}{code:ballshape:declaration}{./ballitem/ballshape.h}
+
+可以看到，ballshape与核心算法中的形状表示类(linkshape)没有任何关系，因为它更多的只是管理属于当前形状中的球，以及中转信号。只是在生成当前形状图形时，输入的参数是形状表示类(linkshape)的对应序号形状对象的信息。
+
+
+\subsubsection{代码实现}
+ballshape类的实现，如例\ref{code:ballshape:definition}所示:
+\codefilecpp{ballshape类定义}{code:ballshape:definition}{./ballitem/ballshape.cpp}
+
+在生成当前形状图形函数(setballshape)中，利用同序号的真实形状表示类(linkshape)对象的信息，设置当前形状图形的序号，其中的球数，以及各个球(ballitem)的属性，并将各个ballitem的信号与ballshape的槽进行连接。
+
+setballpos，recordpos，resetpos，getballpos函数用于设置/记录/重设/获取当前形状图形中球的位置。
+
+addtoscene，removeballs函数用于将形状图形中的球放入/移出场景。
+
+三个槽函数用于中转ballitem发出的信号道ballgrid中。
+
+
+
+\subsection{ballgrid类}
+
+\subsubsection{功能分析}
+
+ballgrid类是本程序的主类，很多运算都要在其中完成。
+主要用途包括:
+\begin{itemize}
+  \item 生成划分形状(默认保存/算法划分)和管理
+  \item 划分形状加入或移出场景
+  \item 将方框(空位)网格加入或移出场景
+  \item 游戏管理:包括将各形状移动到形状外或恢复
+  \item 游戏管理:设置网格大小，形状链接球数，球的直径
+  \item 需要接收来自形状图形的信号，接收来自方框的信号，接收来自场景中按钮的信号
+\end{itemize}
+
+为了可以接收其它对象的发送信号，考虑继承QObject。同时需要进行形状描述，形状划分，落位判断，形状唯一性判断等核心计算，继承grid类，而grid类包含属性linkshape对象，balltopo对象，便于各种计算。
+
+类的声明为:
+\codefilecpp{ballgrid类声明}{code:ballgrid:declaration}{./ballitem/ballgrid.h}
+
+其中: ballgrid仅发送一个信号shapecompleted，表示当形状重新划分完成，便于在游戏界面上显示当前划分总的形状数。
+而需要接受11个信号，即响应的11个槽函数。其中三个来自ballitem的左键点击，右键点击，键盘键入三个事件发出并经ballshape中转的信号，用于记录一下接收到的要落位的形状的信息，重新恢复形状在网格外的原位置，对当前形状进行旋转等操作。一个来自boxitem的左键点击事件信号，用于根据接收到方框(盒子)信息判断能否落位。另外7个信号来自场景中的按钮，文本框等部件。4个按钮控制产生的信号用于游戏开始将所有形状移动到网格外，用于游戏示例将所有形状恢复填入到网格中，用于当网格大小和划分形状的预设球数改变时重设游戏，用于对当前网格大小和划分形状的预设球数下利用算法重新进行划分。3个文本框内容改变产生的信号，用于设置记录网格大小，链接形状中的球数，以及球和方框的直径。
+
+ballgrid的属性中主要包含图形显示和控制相关的信息，记录当前需要落位的形状序号shapeidtosit及其中的焦点球(即选中的球)序号ballidtosit用于落位判断，记录输入的网格大小gridnum和链接形状的球数linknum用于控制游戏难度等，设置球的直径balldiameter用于显示控制，当前网格所要加入的场景指针sceneonwork用于将当前网格放入场景中，而ballshapesingriddefault保存的默认形状图形的信息，ballshapesingrid保持算法划分的形状图形的信息，boxesingrid保持用于网格中的空位(方框)的信息。
+
+上述的属性主要是图形显示，对应的是grid类中的属性。将grid类中的属性设置为protected，这样ballgrid继承后可以直接使用grid类中的属性信息，包括真实形状的描述等等，用于ballgrid中的这些图形属性操作。
+
+\subsubsection{代码实现}
+ballgrid类的实现，如例\ref{code:ballgrid:definition}所示:
+\codefilecpp{ballgrid类定义}{code:ballgrid:definition}{./ballitem/ballgrid.cpp}
+
+
+\subsection{grid类}
+
+\subsubsection{功能分析}
+在游戏中实际上有两个下三角矩阵网格，一个是由空位(方框，盒子)构成的下三角矩阵，一个时由球构成的下三角矩阵，球这个三角矩阵需要进行形状划分等算法，而空位三角矩阵需要进行落位判断等。但这两个三角矩阵只是两种表现形式，真正实际运算中需要的只是一套抽象的三角矩阵，这一套三角矩阵用方框表示构成空位网格，用球表示构成球网格，球网格再划分成不同的球连接形状。
+
+这一个抽象的三角矩阵由grid类来实现。grid类是支持网格划分，形状唯一性判断，落位判断等。
+
+grid类的保护属性包括(设置保护是为了方便子类使用):
+\begin{codecpp}{grid类的保护属性}{code:grid:prop}
+    int n_scale;//网格的大小，行列数均为n_scale
+	int n_balls_ofshape;//链接形状中的球数
+	int n_ofshapes;//划分成的形状数
+    int n_total;
+	int n_focus;//<当前网格中的焦点,用于在其位置及邻居位置判断占用情况,从1开始计数，为实际球序号
+    std::vector<balltopo> vecgrid;//球列表
+	std::vector<linkshape> veclinkshape;//形状列表
+\end{codecpp}
+
+主要用途包括:
+\begin{itemize}
+  \item 生成网格
+  \item 生成/管理网格中的球
+  \item 生成/管理中的形状
+  \item 形状在网格中落位以及移出
+\end{itemize}
+
+setgrid，trigridinit函数完成网格的生成，以及网格中球的拓扑信息初始化。
+
+partition，checksameshape函数完成网格形状划分，以及形状的唯一性判断。
+
+setfocus，重载的两个canbesetdown函数完成网格落位焦点设置(即网格空位焦点)，以及根据该焦点和两种不同形式的形状信息进行能否落位判断。而setshapeoccp，clearshapeoccp函数用于形状在网格中落位或移出时的标记设置。gridocupied函数用于所有形状都落位完成，即空位均被占据的判断。
+
+其它get开头的函数用于给出各种属性信息，以及网格中球(或空位)的序号和行列位置。
+
+\subsubsection{代码实现}
+ballgrid类的声明和实现，在核心算法设计和测试的时候就放在了一起，所以只有一个文件，如例\ref{code:grid:definition}所示:
+\codefilecpp{grid类定义}{code:grid:definition}{./ballitem/shape.h}
+
+
+
+\subsection{balltopo类}
+
+\subsubsection{功能分析}
+balltopo类用于表示网格grid中的球的拓扑信息。
+
+balltopo类的属性包括:
+\begin{codecpp}{balltopo类的属性}{code:balltopo:prop}
+    int sn_self;//< topo[0]  //是真实序号，从1开始计数
+    int sn_left;//< topo[1]  //存在邻居则设置邻居序号，不存在则设置为-1
+    int sn_right;
+    int sn_above;
+    int sn_below;
+	int occupied; //用于判断网格中的球的位置是否已经占用,1表示占用,0表示不占用
+	int shaped;//用于表示已经划分到形状中
+\end{codecpp}
+其中自身和邻居的序号信息用于表示拓扑关系，occupied用于落位判断，shaped用于形状划分。
+
+balltopo类的方法主要是用来获取或设置属性。
+
+\subsubsection{代码实现}
+balltopo类的声明和实现，在核心算法设计和测试的时候就放在了一起，所以只有一个文件，如例\ref{code:ball:definition}所示:
+\codefilecpp{balltopo类定义}{code:ball:definition}{./ballitem/shapeball.h}
+
+在该文件内还定义了一个结构体axiscood用于表示球的行列坐标信息，并定义了一个表示坐标的新数据类型coord。
+
+\subsection{linkshape类}
+
+\subsubsection{功能分析}
+linkshape类用于表示网格grid中划分出的形状的信息，实现形状的描述。
+
+linkshape类的属性包括:形状序号，形状中的球数，形状中球的序号和行列坐标信息以及邻接矩阵及其特征值，还有一些存储的备用的坐标信息。
+\begin{codecpp}{linkshape类的属性}{code:linkshape:prop}
+	int sn_shape; //<当前链接形状序号,从1开始计数，这是真实的数字
+	int n_balls_inshape; //<形状的链接的球数
+
+    std::vector<int> vec_balls_number;//球的序号
+	int rows,cols; //<链接形状当前的总行数和总列数
+    int rowofzero,colofzero; //因为要做规范化话，则把规范化后(0,0)的对应行号记录下来
+	std::vector<coord> vec_coord_shape;//位置坐标矢量与形状矩阵相关
+	std::vector<int> vec_matrix_adjacent;//邻接矩阵矢量
+	std::vector<float> vec_eigen_matrix;//邻接矩阵特征值列表
+
+    std::vector<coord> vec_coord_origin;// 位置坐标矢量-在网格中的初始坐标记录下来
+    std::vector<coord> vec_coord_outer;//位置坐标矢量-在网格外的初始坐标记录下来
+    std::vector<coord> vec_coord_save;//位置坐标矢量-把坐标变换前的信息记录下来便于恢复
+\end{codecpp}
+
+linkshape类的核心算法主要是在构造函数中，根据输入的信息要完成形状的数据结构表示，包括利用矩阵特征值算法求解邻接矩阵特征值，并用冒泡算法排序以便比较。重点函数包括:向左旋转90度，向右旋转90度，上下翻转，左右翻转四个函数用于形状变换后的坐标计算。
+
+而其他方法主要是用来获取或设置属性。
+
+\subsubsection{代码实现}
+linkshape类的声明和实现，在核心算法设计和测试的时候就放在了一起，所以只有一个文件，如例\ref{code:shape:definition}所示:
+\codefilecpp{linkshape类定义}{code:shape:definition}{./ballitem/shapelink.h}
+
+\subsection{sceneinfotrans类}
+sceneinfotrans类是继承QGraphicsScene的场景类，这个类本来并不需要，是在信号传递过程设计中引入的，但其实没有必要。因为开始在游戏网格大小变化时，对场景中按钮和ballgrid对象的信号传递考虑不周全希望引入一个中介，即场景来中转。但在ballgrid类设计了一个简单函数用于传递场景后就不再需要。
+
+这里保留是考虑未来可能对于场景需要增加一些新的功能，所以保留。其中构造函数，信号和槽目前都没有任何处理。
+
+其声明如例\ref{code:scene:declaration}所示:
+\codefilecpp{sceneinfotrans类声明}{code:scene:declaration}{./ballitem/sceneinfotrans.h}
+
+\subsection{主程序}
+主程序main.CPP主要完成ballgrid对象，场景对象，视图对象的构建，完成在场景中添加一些按钮，标签，文本框，并完成一些信号和槽的链接。
+
+其实现如例\ref{code:main:cpp}所示:
+\codefilecpp{主程序main}{code:main}{./ballitem/main.cpp}
+
+
+\section{编译为window程序和andriod的apk软件}
+
+换了个电脑后，采用qt5.8.0的环境编译。
+
+\subsection{编译为window程序}
+
+编译win程序比较简单，选择打开工程后，按crtl+R即可完成编译和运行。
+
+\subsection{编译为andriod的apk软件}
+
+编译andriod程序，首先需要构建qt编译andriod的工具环境，设置creater的设备选项中的andriod选项卡中的工具链，如图\ref{fig:andriod:set}所示。其中需要安装的工具包括:
+jdk-8u144-windows-i586.exe，android-studio-bundle-145.3537739-windows.exe，
+android-ndk-r13b-windows-x86.zip，apache-ant-1.10.1-bin.zip，
+qt-opensource-windows-x86-android-5.8.0.exe。下载和安装方法可以百度搜索，有不少朋友进行了介绍。
+
+\begin{insertfigure}{编译andriod程序工具链}{fig:andriod:set}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-qt-andriod.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+然后设置工程选项，编译工具集，如图\ref{fig:pro:andriod}所示。
+
+\begin{insertfigure}{工程设置选择android工具链}{fig:pro:andriod}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-qt-andriod-cp.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+最后，按crtl+B即可完成编译生成apk文件。
+
+将apk文件安装到手机上可以进行测试和游戏。
+
+需要注意的是，基于widget的qt程序编译成andriod程序后如按钮等控件的大小会发生变化，这些需要在代码中进行调整。
+
+\section{游戏操作}
+最终构成的游戏界面如图\ref{fig:game:gui}所示。
+
+\begin{insertfigure}{游戏界面}{fig:game:gui}{}%第三个参数为空则是单语言标题
+  \centering
+  %\fbox{text}
+  \includegraphics[width=0.9\linewidth]{fig-gaming.jpg}
+  %\begin{tikzpicture}
+%  \path[fill=yellow,draw=yellow!75!red] (0,0) circle (1cm);
+%  \fill[red] (45:5mm) circle (1mm);
+%  \fill[red] (135:5mm) circle (1mm);
+%  \draw[line width=1mm,red] (215:5mm) arc (215:325:5mm);
+%  \end{tikzpicture}
+  %\input{fig-tikz.tex}
+\end{insertfigure}
+
+\subsection{游戏全局控制}
+点击开始按钮开始进行游戏。
+点击示例按钮可以看到某种拼图答案，注意:实现拼图的方案有很多种，示例只是其中一种。
+如果完成当前拼图，想换一套形状的方案，可以点击重新划分按钮，游戏将重新划分生成新的形状。
+当觉得游戏过于简单或困难，可以设置网格大小和链接球数的大小，点击设置或重新划分按钮即可根据新的网格大小和链接球数生成一套新的形状以便进行游戏。其中生成形状数量将在形状数量文本框显示。如果觉得游戏中球的大小不合适可以重新设置球的尺寸，即在球的尺寸文本框设置。
+
+
+\subsection{形状选择和落位}
+采用点击方式选择形状并落位。
+当点击到当前形状的某个球时，该形状及该球被选择。然后点击空位矩阵中的某个空位时，当前空位被选择。这时进行落位判断，判断的起点是选中的球落在选中的空位上，若当前形状的所有球都可以放入一个空位则形状放下，落位成功，否则落位操作无效。
+
+\subsection{形状的旋转翻转复位}
+点击选中某一形状后，这时该形状被点击的球设置为球的旋转和翻转中心，旋转和翻转将围绕该球进行。
+按键盘向右箭头键或界面上的向右旋转按钮，形状向右旋转90度。
+按键盘向左箭头键或界面上的向左旋转按钮，形状向右旋转90度。
+按键盘向上箭头键或界面上的上下翻转按钮，形状上下翻转。
+按界面上的移出网格按钮或者用右键点选该形状，形状将复位到原来在网格外的位置。
+
+
+
+
+%\input{./manual/articleusage.tex}
+%\input{./manual/articleimplement.tex}
+\section{结论}
+设计并实现了一个拼图游戏。利用QT的跨平台特性，分别编译成windows下的程序和android下的程序，真正实现了跨平台应用。
+
+当然其中还存在不少问题需要改进，特别是在andriod下的体验。
+
+整个代码和文档都放在github上，欢迎朋友们提供宝贵意见，更欢迎做出改进，欢迎PR!
+
+
+
+%%----------------------------------------------------------------
+\input{./manual/articlemodelpartc.tex}
+%%一篇论文结束
+%%----------------------------------------------------------------
+
+
+%%================================================================
+%%下一篇论文,格式与上一篇类似,只要修改内容即可
+%%----------------------------------------------------------------
+%新的一篇论文放到articlesecond.tex文件中，后面的新论文类似，通常不包含进来。
+%\input{articlesecond.tex}
+
+
+%为方便超链接查看，这里可以加入目录
+\vspace{1cm}
+\noindent\rule{\linewidth}{3pt}
+\phantomsection
+\addcontentsline{toc}{section}{目录}
+\tableofcontents
+%\renewcommand{\numberline}[1]{#1~}
+\phantomsection
+\addcontentsline{toc}{section}{插图}
+\listoffigures
+\phantomsection
+\addcontentsline{toc}{section}{示例}
+\listofegcode
+
+\end{document}
+

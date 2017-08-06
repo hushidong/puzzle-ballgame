@@ -1,0 +1,75 @@
+(*根据检测距离计算SNR，注意其中参数有的是标准单位，有的是分贝单位*)
+snrdb[pt_, f0_, g_, sigma_, te_, B_, F_, L_, rmax_] :=
+  10 Log10[pt] + 2 g + 10 Log10[(3*10^8/f0)^2] + 10 Log10[sigma] -
+   10 Log10[(4 Pi)^3] - 10 Log10[1.38 (10)^(-23)] - 10 Log10[te] -
+   10 Log10[B] - F - L - 10 Log10[rmax^4];
+pt = 1.5*10^6;(*W*)
+f0 = 5.6*10^9;(*Hz*)
+g = 45;(*db*)
+te = 290;(*K*)
+B = 5*10^6;(*Hz*)
+F = 3;(*db*)
+L = 6;(*db*)
+sigma = 0.1;(*m^2*)
+
+sigma1 = 1;
+sigma2 = 0.1;
+sigma3 = 0.01;
+Plot[{snrdb[pt, f0, g, sigma1, te, B, F, L, r],
+  snrdb[pt, f0, g, sigma2, te, B, F, L, r],
+  snrdb[pt, f0, g, sigma3, te, B, F, L, r]}, {r, 25000, 165000},
+ PlotRange -> {{20000, 181000}, {-10, 50}},
+ AxesOrigin -> {20000, -10},
+ Ticks -> {Table[{k*20000, 20*k}, {k, 1, 9}], Automatic},
+ GridLines -> {Table[k*20000, {k, 1, 9}], Automatic},
+ GridLinesStyle -> Directive[Gray, Thin],
+ AxesLabel -> {"检测距离", "SNR/dB"},
+ PlotLegends ->
+  Placed[{"\[Sigma]=0dBsm", "\[Sigma]=-10dBsm",
+    "\[Sigma]=-20dBsm"}, {Right, Top}],
+ PlotStyle -> {Red, {Green, Dashed}, {Blue, DotDashed}}]
+
+pt1 = 2.16*10^6;
+pt2 = 1.5*10^6;
+pt3 = 0.6*10^6;
+Plot[{snrdb[pt1, f0, g, sigma, te, B, F, L, r],
+  snrdb[pt2, f0, g, sigma, te, B, F, L, r],
+  snrdb[pt3, f0, g, sigma, te, B, F, L, r]}, {r, 25000, 165000},
+ PlotRange -> {{20000, 181000}, {-5, 40}}, AxesOrigin -> {20000, -5},
+ Ticks -> {Table[{k*20000, 20*k}, {k, 1, 9}], Automatic},
+ GridLines -> {Table[k*20000, {k, 1, 9}], Automatic},
+ GridLinesStyle -> Directive[Gray, Thin],
+ AxesLabel -> {"检测距离", "SNR/dB"},
+ PlotLegends ->
+  Placed[{"Pt=2.16MW", "Pt=1.5 MW", "Pt=0.6 MW"}, {Right, Top}],
+ PlotStyle -> {Red, {Green, Dashed}, {Blue, DotDashed}},
+ Axes -> True]
+
+(*根据给定检测距离和SNR计算脉冲宽度，注意其中参数有的是标准单位，有的是分贝单位*)
+plwd[pt_, f0_, g_, sigma_, te_, snr_, F_, L_, rmax_] :=
+10^((10 Log10[(4 Pi)^3] + 10 Log10[1.38 (10)^(-23)] + 10 Log10[te]
+ + F + L + 10 Log10[rmax^4] + snr - 10 Log10[pt]
+ - 2 g -10 Log10[(3*10^8/f0)^2] - 10 Log10[sigma])/10);
+pt = 10^6;(*W*)
+f0 = 5.6*10^9;(*Hz*)
+g = 40;(*db*)
+sigma = 0.1;(*m^2*)
+te = 300;(*K*)
+F = 5;(*db*)
+L = 6;(*db*)
+r1 = 75000;(*m*)
+r2 = 100000;
+r3 = 150000;
+LogPlot[{plwd[pt, f0, g, sigma, te, snr, F, L, r1],
+  plwd[pt, f0, g, sigma, te, snr, F, L, r2],
+  plwd[pt, f0, g, sigma, te, snr, F, L, r3]}, {snr, 5, 20},
+ PlotRange -> {{5, 20.1}, {10^-7, 10^-3}}, AxesOrigin -> {5, 10^-7},
+ Ticks -> {Table[{k*5.0, k*5}, {k, 1, 4}],
+   Table[{10^-7*10^k, 0.1*10^k}, {k, 0, 4}]},
+ GridLines -> {{5, 10, 15, 20},
+   Table[(Mod[k, 10] + 1)*10^(-7 + Quotient[k, 10]), {k, 0, 39}]},
+ GridLinesStyle -> {Automatic, Directive[Gray, Dashed, Thin]},
+ AxesLabel -> {"SNR", "\[Tau]/\[Mu]s"},
+ PlotLegends -> Placed[{"R=75KM", "R=100KM", "R=150KM"}, {Left, Top}],
+  PlotStyle -> {Red, {Green, Dashed}, {Blue, DotDashed}},
+ Axes -> True]
