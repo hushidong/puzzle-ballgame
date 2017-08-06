@@ -24,6 +24,7 @@ LaTeX Project Public License 1.3 or later
 ### 游戏全局控制
 
 游戏基本界面:
+
 ![ballgame](https://github.com/hushidong/puzzle-ballgame/blob/master/manual/fig-gaming.jpg)
 
 
