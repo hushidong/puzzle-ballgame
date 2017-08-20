@@ -760,6 +760,15 @@ int canbesetdown(int boxid,int ballid,int shapeid)//参数是框的序号，形�
     return flagcanbe;
 }
 
+void cleargridoccp()//游戏完成后清除所有网格的占用
+{
+    for(int i=0;i<n_total;i++)
+    {
+        vecgrid[i].setoccp(0);
+        //qDebug()<<"sn_ball clear occp:"<<sn_ball;
+    }
+}
+
 void clearshapeoccp(int boxid,int ballid,int shapeid)//参数是框的序号，形状中当前球的序号，形状的序号，都从1开始计数
 {
 
@@ -798,7 +807,10 @@ int gridocupied() //判断网格是否全被占据
     int flaggridoccp=1;
     for(int i=0;i<n_total;i++)
     {
-        if(vecgrid[i].getoccp()==0) flaggridoccp=0;
+        if(vecgrid[i].getoccp()==0) {
+            qDebug()<<"box["<<i<<"]"<<vecgrid[i].getoccp();
+            flaggridoccp=0;
+        }
     }
     return flaggridoccp;
 }

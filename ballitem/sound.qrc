@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/sound">
+        <file>wav/dropdown.wav</file>
+        <file>wav/moveout.wav</file>
+        <file>wav/selected.wav</file>
+        <file>wav/trans.wav</file>
+        <file>wav/warning.wav</file>
+        <file>wav/gamewon.wav</file>
+    </qresource>
+</RCC>

@@ -6,7 +6,9 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets  xml
+
+QT += multimedia
 
 TARGET = ballitem
 TEMPLATE = app
@@ -29,3 +31,6 @@ HEADERS  += mainwindow.h \
     shapelink.h \
     shapeball.h \
     sceneinfotrans.h
+
+RESOURCES += \
+    sound.qrc
