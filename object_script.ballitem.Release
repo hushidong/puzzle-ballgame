@@ -1,0 +1,15 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\ballitem.o
+./release\ballshape.o
+./release\boxitem.o
+./release\ballgrid.o
+./release\sceneinfotrans.o
+./release\qrc_sound.o
+./release\moc_mainwindow.o
+./release\moc_ballitem.o
+./release\moc_ballshape.o
+./release\moc_boxitem.o
+./release\moc_ballgrid.o
+);

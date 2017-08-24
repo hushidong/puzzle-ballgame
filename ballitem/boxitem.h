@@ -21,7 +21,7 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
 
 signals:
-    void tojudgesitdown(int boxid);
+    void tojudgesitdown(int boxid);//要进行落位判断的信号，参数是box的id号
 };
 
 #endif // BOXITEM_H

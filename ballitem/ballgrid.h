@@ -11,6 +11,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QtXml>
+#include <QMediaPlayer>
 
 class ballgrid : public QObject,  public grid
 {
@@ -69,16 +70,20 @@ private:
 
     int shapeidtosit,ballidtosit;//记录当前需要落位的形状序号及其中的焦点球(即选中的球)序号
     int gridnum,linknum;//记录输入的网格大小和链接形状的球数
-    int flaggridchanged;//记录是否更改了网格大小和链接球数
     int balldiameter;//设置球的直径
     sceneinfotrans *sceneonwork;//当前网格所要加入的场景，注意用指针是避免传值
     int gamestarted;//记录游戏开始，=1表示已开始，才会做落位判断
+    int flaggridchanged;//记录是否更改了网格大小和链接球数，有更改，则设置为1
+    int flagdiamchanged;//记录是否更改了球的直径，有更改，则设置为1
+    int flaggametimeon;//记录是否开始游戏计时，当游戏计时开始后，只有完成游戏才能更改计时，示例不影响计时
+    int flagexampleon;//记录是否处于示例状态，处于示例状态时设置为1，非处于时设置为0
 
     QTime timecount;
     QTimer timera;
 
     QDomDocument doc;
     float timegame;//用于记录本次游戏时间
+    QMediaPlayer *player;
 
 };
 

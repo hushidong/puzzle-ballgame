@@ -1,7 +1,7 @@
 #include "ballgrid.h"
 #include <qDebug>
 #include <QMessageBox>
-#include <QMediaPlayer>
+
 #include <QInputDialog>
 #include <QTableWidget>
 #include <QDialog>
@@ -15,10 +15,14 @@ ballgrid::ballgrid()
     gridnum=10;
     linknum=5;
     flaggridchanged=0;
+    flagdiamchanged=0;
+    flaggametimeon=0;
+    flagexampleon=0;
     balldiameter=40;
     gamestarted=0;
     timera.setInterval(1000);
     QObject::connect(&timera,&QTimer::timeout,this,&ballgrid::recordtime);//
+    player=new QMediaPlayer;
 
 
     //读取或创建一个xml文件用于记录游戏成绩
@@ -73,6 +77,8 @@ int ballgrid::getflag()
 void ballgrid::setballdiameter(QString text1)
 {
     balldiameter=text1.toInt();
+    flagdiamchanged=1;
+    gamestarted=0;//当球的直径改变后，因为涉及到球的重新绘制，因此将不能进一步游戏，只能重新设置或重新划分。所以这里设置gamestarted=0
 }
 
 void ballgrid::dealgridnumtext(QString text1)
@@ -94,54 +100,102 @@ void ballgrid::recordtime()
     int msa=timecount.elapsed();
     float sa=msa/1000.0;
     timegame=sa;
-    emit timerecorded(QString("%1").arg(sa));
+    emit timerecorded(QString("%1").arg(sa));//发送信号，显示到界面中的文本框中
 }
 
 void ballgrid::gamestart(bool a)
 {
     Q_UNUSED(a);
-    setshaperandposdefault();
-    QMediaPlayer *player=new QMediaPlayer;
-    player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
-    player->play();
-    cleargridoccp();
-    gamestarted=1;
-    timecount.start();//计时开始
-    timera.start();
+    if(flaggridchanged==0 && flagdiamchanged==0) {
+        setshaperandposdefault();
+        player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
+        player->play();
+        cleargridoccp();
+        gamestarted=1;
+        if(flaggametimeon==0) {//计时器开始工作，只有当新游戏开始时才计时
+            timecount.start();//开始时间记录
+            timera.start();
+            flaggametimeon=1;
+        }
+    }else{
+        if(flaggridchanged==1)
+        {
+            player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+            player->play();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("WARNING");
+            msgBox.setText("Grid has been changed, need to partition, \nplease pull reset or reparition button");
+            msgBox.exec();
+        }
+        if(flagdiamchanged==1)
+        {
+            player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+            player->play();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("WARNING");
+            msgBox.setText("Ball diameter has been changed, need to reset, \nplease pull reset or reparition button");
+            msgBox.exec();
+        }
+    }
 }
 
 void ballgrid::gameexample(bool a)
 {
-
     Q_UNUSED(a);
-    for(int i=0;i<n_ofshapes;i++)
-    {
-        //int id=veclinkshape[i].getshapesn();
-        int n_ballsinshape=veclinkshape[i].getshapenballs();
-        //qDebug()<<"id:"<<id;
-        //qDebug()<<"n_ball_inshape:"<<n_ballsinshape;
+    if(flagdiamchanged==0) {//当球的直径未修改时，示例才能正确
+        if(flaggametimeon==1){
+            if(flagexampleon==0) {
+                for(int i=0;i<n_ofshapes;i++)
+                {
+                    //int id=veclinkshape[i].getshapesn();
+                    int n_ballsinshape=veclinkshape[i].getshapenballs();
+                    //qDebug()<<"id:"<<id;
+                    //qDebug()<<"n_ball_inshape:"<<n_ballsinshape;
 
-        for(int j=0;j<n_ballsinshape;j++)
-        {
-            int row=veclinkshape[i].getptroworig(j);
-            int col=veclinkshape[i].getptcolorig(j);
-            ballshapesingriddefault[i]->setballpos(j,col*balldiameter,row*balldiameter);
+                    for(int j=0;j<n_ballsinshape;j++)//直接根据记录的球的原始的行列信息重设位置
+                    {
+                        int row=veclinkshape[i].getptroworig(j);
+                        int col=veclinkshape[i].getptcolorig(j);
+                        ballshapesingriddefault[i]->setballpos(j,col*balldiameter,row*balldiameter);
+                    }
+                }
+                player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
+                player->play();
+                gamestarted=0;
+                flagexampleon=1;
+            }else{
+                setshaperandposdefault();
+                player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
+                player->play();
+                cleargridoccp();
+                gamestarted=1;
+                flagexampleon=0;
+            }
+        }else{
+            player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+            player->play();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("WARNING");
+            msgBox.setText("Game is not started, need not to show example,\nplease pull the start button!");
+            msgBox.exec();
         }
+    }else
+    {
+        player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+        player->play();
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("WARNING");
+        msgBox.setText("Ball diameter is changed, need to reset,\nplease pull the reset or repartition button!");
+        msgBox.exec();
     }
-    QMediaPlayer *player=new QMediaPlayer;
-    player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
-    player->play();
-    gamestarted=0;
-
 }
 
 void ballgrid::gameset(bool a)
 {
     Q_UNUSED(a);
-    QMediaPlayer *player=new QMediaPlayer;
     player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
     player->play();
-    if(flaggridchanged==1)//只有网格大小或链接球数改变了才做
+    if(flaggridchanged==1 || flagdiamchanged==1)//只有网格大小或链接球数改变了才做
     {
         qDebug()<<"do new partition";
         removeboxes();
@@ -153,7 +207,6 @@ void ballgrid::gameset(bool a)
         addtoscenedefault();
     }else
     {
-        QMediaPlayer *player=new QMediaPlayer;
         player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
         player->play();
         QMessageBox msgBox;
@@ -162,16 +215,21 @@ void ballgrid::gameset(bool a)
         msgBox.exec();
     }
     flaggridchanged=0;
+    flagdiamchanged=0;
     gamestarted=0;
+    if(flaggametimeon==1) {//计时器开始工作，只有当新游戏开始时才计时
+        timera.stop();
+        flaggametimeon=0;
+    }
 }
 
 void ballgrid::gamerepart(bool a)
 {
     Q_UNUSED(a);
-    QMediaPlayer *player=new QMediaPlayer;
     player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
     player->play();
     flaggridchanged=1;
+    flagdiamchanged=1;
     qDebug()<<"redo new partition";
     removeboxes();
     removeshapes();
@@ -183,7 +241,12 @@ void ballgrid::gamerepart(bool a)
     qDebug()<<"n_total="<<n_total;
     addtoscenedefault();
     flaggridchanged=0;
+    flagdiamchanged=0;
     gamestarted=0;
+    if(flaggametimeon==1) {//计时器开始工作，只有当新游戏开始时才计时
+        timera.stop();
+        flaggametimeon=0;
+    }
 }
 
 
@@ -270,11 +333,11 @@ void ballgrid::judgesitdown(int boxid)//点击选中box时的形状落位判断
         }
 
         //如果能放入则发送信息给shape，接着shape调整位置，//即绘图
-        int rowfocusinshape=veclinkshape[shapeidtosit-1].getptrow(ballidtosit-1);
-        int colfocusinshape=veclinkshape[shapeidtosit-1].getptcol(ballidtosit-1);
-        int rowfocusingrid=getrowcolformsn(boxid).row;
-        int colfocusingrid=getrowcolformsn(boxid).col;
         if(flagyestosit>0) {
+            int rowfocusinshape=veclinkshape[shapeidtosit-1].getptrow(ballidtosit-1);
+            int colfocusinshape=veclinkshape[shapeidtosit-1].getptcol(ballidtosit-1);
+            int rowfocusingrid=getrowcolformsn(boxid).row;
+            int colfocusingrid=getrowcolformsn(boxid).col;
             setshapeoccp(boxid,ballidtosit,shapeidtosit);//设置一下占用情况
             for(int j=0;j<n_balls;j++)
             {
@@ -283,14 +346,12 @@ void ballgrid::judgesitdown(int boxid)//点击选中box时的形状落位判断
 
                 ballshapesingriddefault[shapeidtosit-1]->setballpos(j,col*balldiameter,row*balldiameter);
             }
-            QMediaPlayer *player=new QMediaPlayer;
             player->setMedia(QUrl("qrc:/sound/wav/dropdown.wav"));//行
             player->play();
         }
 
         if(gridocupied())
         {
-            QMediaPlayer *player=new QMediaPlayer;
             player->setMedia(QUrl("qrc:/sound/wav/gamewon.wav"));//行
             player->play();
             QMessageBox msgBox;
@@ -299,6 +360,7 @@ void ballgrid::judgesitdown(int boxid)//点击选中box时的形状落位判断
             msgBox.exec();
             gamestarted=0;
             timera.stop();
+            flaggametimeon=0;
             isinrank(gridnum,linknum,timegame);//时间成绩处理
         }
     }
@@ -501,7 +563,6 @@ void ballgrid::showcredit()
 
 void ballgrid::dealshapetosit(int ballid,int shapeida)
 {
-
     shapeidtosit=shapeida;
     ballidtosit=ballid;
     qDebug()<<"shape's balls:"<<veclinkshape[shapeida-1].getshapenballs();
@@ -512,7 +573,6 @@ void ballgrid::dealshapetosit(int ballid,int shapeida)
         qDebug()<<" coord outer"<<veclinkshape[shapeida-1].getptrowouter(i)<<veclinkshape[shapeida-1].getptcolouter(i);
         }
     }
-    QMediaPlayer *player=new QMediaPlayer;
     player->setMedia(QUrl("qrc:/sound/wav/selected.wav"));
     player->play();
     qDebug()<<"recieved info from shape:"<<shapeida;
@@ -523,12 +583,19 @@ void ballgrid::shapeturnright(bool a)//按钮控制向右旋转
 {
     Q_UNUSED(a);
     if(gamestarted==1) {
-        shapetrans(shapeidtosit,1);
-        QMediaPlayer *player=new QMediaPlayer;
-        player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
-        player->play();
+        if(shapeidtosit>0){//当有形状选中的时候做
+            shapetrans(shapeidtosit,1);
+            player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
+            player->play();
+        }else{
+            player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+            player->play();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("WARNING");
+            msgBox.setText("None shape was selected! \npress choose a shape!");
+            msgBox.exec();
+        }
     }else{
-        QMediaPlayer *player=new QMediaPlayer;
         player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
         player->play();
         QMessageBox msgBox;
@@ -542,12 +609,19 @@ void ballgrid::shapeturnleft(bool a)//按钮控制向左旋转
 {
     Q_UNUSED(a);
     if(gamestarted==1) {
-        shapetrans(shapeidtosit,2);
-        QMediaPlayer *player=new QMediaPlayer;
-        player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
-        player->play();
+        if(shapeidtosit>0){//当有形状选中的时候做
+            shapetrans(shapeidtosit,2);
+            player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
+            player->play();
+        }else{
+            player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+            player->play();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("WARNING");
+            msgBox.setText("None shape was selected! \npress choose a shape!");
+            msgBox.exec();
+        }
     }else{
-        QMediaPlayer *player=new QMediaPlayer;
         player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
         player->play();
         QMessageBox msgBox;
@@ -561,12 +635,19 @@ void ballgrid::shapemirrorab(bool a)//按钮控制上下翻转
 {
     Q_UNUSED(a);
     if(gamestarted==1) {
-        shapetrans(shapeidtosit,3);
-        QMediaPlayer *player=new QMediaPlayer;
-        player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
-        player->play();
+        if(shapeidtosit>0){//当有形状选中的时候做
+            shapetrans(shapeidtosit,3);
+            player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
+            player->play();
+        }else{
+            player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+            player->play();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("WARNING");
+            msgBox.setText("None shape was selected! \npress choose a shape!");
+            msgBox.exec();
+        }
     }else{
-        QMediaPlayer *player=new QMediaPlayer;
         player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
         player->play();
         QMessageBox msgBox;
@@ -580,12 +661,19 @@ void ballgrid::shapemirrorlr(bool a)//按钮控制左右翻转
 {
     Q_UNUSED(a);
     if(gamestarted==1) {
-        shapetrans(shapeidtosit,4);
-        QMediaPlayer *player=new QMediaPlayer;
-        player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
-        player->play();
+        if(shapeidtosit>0){//当有形状选中的时候做
+            shapetrans(shapeidtosit,4);
+            player->setMedia(QUrl("qrc:/sound/wav/trans.wav"));//行
+            player->play();
+        }else{
+            player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+            player->play();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("WARNING");
+            msgBox.setText("None shape was selected! \npress choose a shape!");
+            msgBox.exec();
+        }
     }else{
-        QMediaPlayer *player=new QMediaPlayer;
         player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
         player->play();
         QMessageBox msgBox;
@@ -598,10 +686,18 @@ void ballgrid::shapemirrorlr(bool a)//按钮控制左右翻转
 void ballgrid::shaperesetpos(bool a)//按钮控制移出网格
 {
     Q_UNUSED(a);
-    shapereset(ballidtosit,shapeidtosit);
-    QMediaPlayer *player=new QMediaPlayer;
-    player->setMedia(QUrl("qrc:/sound/wav/moveout.wav"));//行
-    player->play();
+    if(shapeidtosit>0){//当有形状选中的时候做
+        shapereset(ballidtosit,shapeidtosit);
+        player->setMedia(QUrl("qrc:/sound/wav/moveout.wav"));//行
+        player->play();
+    }else{
+        player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
+        player->play();
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("WARNING");
+        msgBox.setText("None shape was selected! \npress choose a shape!");
+        msgBox.exec();
+    }
 }
 
 
@@ -623,11 +719,10 @@ void ballgrid::shapereset(int ballid,int shapeida)
 
         ballshapesingriddefault[shapeida-1]->resetpos();
         veclinkshape[shapeida-1].resetoutercoord();
-        QMediaPlayer *player=new QMediaPlayer;
         player->setMedia(QUrl("qrc:/sound/wav/moveout.wav"));//行
         player->play();
+
     }else{
-        QMediaPlayer *player=new QMediaPlayer;
         player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
         player->play();
         QMessageBox msgBox;
@@ -756,7 +851,6 @@ void ballgrid::setshapesdefault(int arraysize)//利用原先存有的默认的�
             emit shapecompleted(stra);
         }else
         {
-            QMediaPlayer *player=new QMediaPlayer;
             player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
             player->play();
             QMessageBox msgBox;
@@ -793,9 +887,10 @@ void ballgrid::setshaperandposdefault()//将划分形状放到网格外
 {
     int colnow=0;
     int rownow=-5;
+    int colbound=(40*4+200)/balldiameter+2;
     for(int i=0;i<n_ofshapes;i++)
     {
-        if(colnow < gridnum+2 ) {//一排排完前 //一半竖着放i < n_ofshapes/2
+        if(colnow < colbound ) {//一排排完前竖着放，即形状的起点位置小于(colbound)*balldiameter，即用列表示的话，不超过colbound列时竖着排
             int rows=veclinkshape[i].getrows();
             int cols=veclinkshape[i].getcols();
             if(cols > rows )
@@ -814,7 +909,7 @@ void ballgrid::setshaperandposdefault()//将划分形状放到网格外
             }
             colnow=colnow+cols+1;
         }
-        else//另一半横着放
+        else//剩下的横着放
         {
             int rows=veclinkshape[i].getrows();
             int cols=veclinkshape[i].getcols();
@@ -863,7 +958,6 @@ void ballgrid::shapetrans(int shapeida,int transid)//形状变换:旋转和翻�
                     setshapeoccp(boxid,ballidtosit,shapeida);
                 }else
                 {
-                    QMediaPlayer *player=new QMediaPlayer;
                     player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
                     player->play();
                     QMessageBox msgBox;
@@ -892,7 +986,6 @@ void ballgrid::shapetrans(int shapeida,int transid)//形状变换:旋转和翻�
                     setshapeoccp(boxid,ballidtosit,shapeida);
                 }else
                 {
-                    QMediaPlayer *player=new QMediaPlayer;
                     player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
                     player->play();
                     QMessageBox msgBox;
@@ -923,7 +1016,6 @@ void ballgrid::shapetrans(int shapeida,int transid)//形状变换:旋转和翻�
                     setshapeoccp(boxid,ballidtosit,shapeida);
                 }else
                 {
-                    QMediaPlayer *player=new QMediaPlayer;
                     player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
                     player->play();
                     QMessageBox msgBox;
@@ -954,7 +1046,6 @@ void ballgrid::shapetrans(int shapeida,int transid)//形状变换:旋转和翻�
                     setshapeoccp(boxid,ballidtosit,shapeida);
                 }else
                 {
-                    QMediaPlayer *player=new QMediaPlayer;
                     player->setMedia(QUrl("qrc:/sound/wav/warning.wav"));//行
                     player->play();
                     QMessageBox msgBox;

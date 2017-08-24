@@ -1,0 +1,15 @@
+INPUT(
+./debug\main.o
+./debug\mainwindow.o
+./debug\ballitem.o
+./debug\ballshape.o
+./debug\boxitem.o
+./debug\ballgrid.o
+./debug\sceneinfotrans.o
+./debug\qrc_sound.o
+./debug\moc_mainwindow.o
+./debug\moc_ballitem.o
+./debug\moc_ballshape.o
+./debug\moc_boxitem.o
+./debug\moc_ballgrid.o
+);

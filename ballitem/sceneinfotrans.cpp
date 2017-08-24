@@ -1,12 +1,12 @@
 #include "sceneinfotrans.h"
 #include <qDebug>
-#include "ballgrid.h"
-#include <QGraphicsWidget>
-#include <QGraphicsProxyWidget>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QGraphicsGridLayout>
+//#include "ballgrid.h"
+//#include <QGraphicsWidget>
+//#include <QGraphicsProxyWidget>
+//#include <QPushButton>
+//#include <QLabel>
+//#include <QLineEdit>
+//#include <QGraphicsGridLayout>
 
 
 sceneinfotrans::sceneinfotrans()

@@ -16,8 +16,8 @@ public:
     //void setColor(const QColor &color);
     //QRectF boundingRect() const;
     //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    void setshapeid(int id);
-    void setballid(int id);
+    void setshapeid(int id);//设置当前球所属形状的id号
+    void setballid(int id);//设置当前球在所属形状中的序号
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent * event);
@@ -26,14 +26,14 @@ protected:
     void keyPressEvent(QKeyEvent * event);
 
 signals:
-    void rotateormirror(int transid);
-    void ballpressed(int ballid,int shapeid);
-    void ballpressedright(int ballid,int shapeid);
+    void rotateormirror(int transid);//形状旋转或翻转信号，transid表示项左，右旋转，上下，左右翻转
+    void ballpressed(int ballid,int shapeid);//当前球和形状被选中信号
+    void ballpressedright(int ballid,int shapeid);//当前球所在形状移出网格的信号
 
 
 private:
     int ballid; //标记当前在形状中的序号，是第几个球,从1开始计数
-    int shapeid;//标注当前球属于哪个形状，从1开始计数
+    int shapeid;//标记当前球属于哪个形状，从1开始计数
     //    QColor brushcolor;
 
 };

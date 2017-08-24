@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     buttonexample->setMaximumHeight(20);
     //buttonstart->setFixedSize(50, 30);
 
-    QPushButton *buttonset=new QPushButton(QObject::tr("设置"));
+    QPushButton *buttonset=new QPushButton(QObject::tr("重新设置"));
     QPushButton *buttonpart=new QPushButton(QObject::tr("重新划分"));
     QLabel * labelgridnum=new QLabel(QObject::tr("网格大小"));
     QLabel * labellinknum=new QLabel(QObject::tr("链接球数"));
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     QLabel * label_nshapes=new QLabel(QObject::tr("形状数量"));
     QLabel * labeldiameter=new QLabel(QObject::tr("球的尺寸"));
-    QLineEdit * text_nshapes=new QLineEdit("0");
+    QLineEdit * text_nshapes=new QLineEdit("12");
     text_nshapes->setMaximumWidth(50);//设置最大尺度长度为50像素
     QLineEdit * textdiameter=new QLineEdit("40");
     textdiameter->setMaximumWidth(50);

@@ -10,17 +10,17 @@ boxitem::boxitem()
     setFlag(QGraphicsItem::ItemIsFocusable);
 }
 
-void boxitem::setboxid(int id)
+void boxitem::setboxid(int id)//用于设置盒子(框)序号
 {
     boxid=id;
 }
 
-void boxitem::mousePressEvent(QGraphicsSceneMouseEvent * event)
+void boxitem::mousePressEvent(QGraphicsSceneMouseEvent * event)//鼠标点击事件处理
 {
     Q_UNUSED(event);
     setFocus();
     setCursor(Qt::ClosedHandCursor);
-    emit tojudgesitdown(boxid);
+    emit tojudgesitdown(boxid);//发送信号，用于落位判断
     //qDebug()<<"focus:"<<hasFocus();
     //qDebug()<<"focus:"<<focusItem();
     //qDebug()<<"emit:"<<"box:tojudgesitdown";

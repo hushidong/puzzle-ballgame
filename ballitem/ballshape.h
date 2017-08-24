@@ -20,21 +20,21 @@ public:
     void addtoscene(sceneinfotrans &scene);//将形状加入场景
     void removeballs(sceneinfotrans &scene);//将形状移出场景
     void setballpos(int i,int posx,int posy);//设置索引为i的球位置，i从0开始计数
-    void recordpos();//记录一下游戏开始前球放在网格外的位置
-    void resetpos();//恢复一下游戏开始前球放在网格外的位置
-    QPointF getballpos(int sn);//得到球真实序号为sn的位置,sn从1开始计数
+    void recordpos();//记录一下游戏开始时球放在网格外的坐标位置
+    void resetpos();//恢复一下游戏开始时球放在网格外的坐标位置
+    QPointF getballpos(int sn);//得到球真实序号为sn的坐标位置,sn从1开始计数
     void setballdiameter(int diameter);//设置球的直径
 
 private:
-    int shapeid;
-    int n_balls;
-    QList<ballitem *> balls;
-    QList<QPointF> ballposinit;//游戏开始前放在框外的位置
-    int balldiameter;
+    int shapeid;//当前形状的id
+    int n_balls;//当前形状内的球数
+    QList<ballitem *> balls;//当前形状内球的列表
+    QList<QPointF> ballposinit;//游戏开始前放在框(网格)外的坐标位置
+    int balldiameter;//当前形状内球的直径
 
 signals:
     void shapeselected(int ballid,int shapeida);//当前形状被选中，则传递给ballgird
-    void shapetoreset(int ballid,int shapeida);//当前形状被选中,需要还原为原来的位置，则传递给ballgird
+    void shapetoreset(int ballid,int shapeida);//当前形状被选中,需要还原为原来在网格外的位置，则传递给ballgird
     void shapetotrans(int shapeida,int transid);//当前形状被选中，需要做旋转，翻转变换
 
 public slots://链接的槽与信号的参数应是一致的。
