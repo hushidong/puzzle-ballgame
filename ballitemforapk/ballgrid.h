@@ -8,6 +8,10 @@
 #include "boxitem.h"
 #include "sceneinfotrans.h"
 #include <QObject>
+#include <QTime>
+#include <QTimer>
+#include <QtXml>
+#include <QMediaPlayer>
 
 class ballgrid : public QObject,  public grid
 {
@@ -32,6 +36,7 @@ public:
     int getlinknum();//获取划分形状的预设球数信息linknum
     int getflag();//获取网格大小和划分形状的预设球数改变的标志信息flaggridchanged
     void setworkscene(sceneinfotrans &scene);//保存当前所在的场景信息
+    void isinrank(int gridnumber,int linknumber,float gametime);//判断本次游戏成绩是否进入排行榜，进入则修改成绩记录xml
 
 public slots:
     void judgesitdown(int boxid);//根据接收到盒子信息去判断能否落位
@@ -41,6 +46,7 @@ public slots:
     void shapeturnright(bool a);//按钮控制向右旋转
     void shapeturnleft(bool a);//按钮控制向左旋转
     void shapemirrorab(bool a);//按钮控制上下翻转
+    void shapemirrorlr(bool a);//按钮控制左右翻转
     void shaperesetpos(bool a);//按钮控制移出网格
     void gamestart(bool a);//游戏开始，将所有形状移动到网格外
     void gameexample(bool a);//游戏示例，将所有形状恢复填入到网格中
@@ -49,9 +55,12 @@ public slots:
     void dealgridnumtext(QString text1);//根据界面输入信息记录网格大小
     void deallinknumtext(QString text1);//根据界面输入信息记录划分形状的预设球数
     void setballdiameter(QString text1);//根据界面输入信息记录球和方框的直径
+    void recordtime();//记录时间,利用timer不断的显示流逝的游戏时间
+    void showcredit();//显示成绩排行榜
 
 signals:
     void shapecompleted(QString a);//当形状重新划分时，划分完成的信号
+    void timerecorded(QString a);//记录一下游戏时间
 
 private:
     QList<ballshape *> ballshapesingrid;//算法划分的形状图形的信息
@@ -61,9 +70,21 @@ private:
 
     int shapeidtosit,ballidtosit;//记录当前需要落位的形状序号及其中的焦点球(即选中的球)序号
     int gridnum,linknum;//记录输入的网格大小和链接形状的球数
-    int flaggridchanged;//记录是否更改了网格大小和链接球数
     int balldiameter;//设置球的直径
     sceneinfotrans *sceneonwork;//当前网格所要加入的场景，注意用指针是避免传值
+    int gamestarted;//记录游戏开始，=1表示已开始，才会做落位判断
+    int flaggridchanged;//记录是否更改了网格大小和链接球数，有更改，则设置为1
+    int flagdiamchanged;//记录是否更改了球的直径，有更改，则设置为1
+    int flaggametimeon;//记录是否开始游戏计时，当游戏计时开始后，只有完成游戏才能更改计时，示例不影响计时
+    int flagexampleon;//记录是否处于示例状态，处于示例状态时设置为1，非处于时设置为0
+
+    QTime timecount;
+    QTimer timera;
+
+    QDomDocument doc;
+    float timegame;//用于记录本次游戏时间
+    QMediaPlayer *player;
+
 };
 
 #endif // BALLGRID_H
